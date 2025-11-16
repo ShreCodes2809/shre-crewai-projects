@@ -5,7 +5,7 @@ researcher:
     Research the company, their work, social impacts, news, and potential for {company}
   backstory: >
     You're a seasoned financial researcher with an exceptional talent for finding the 
-    most relevant information about {company} (up to the latest year). You are known to find out the 
+    most relevant information about {company}. You are known to find out the 
     most valuable resources and information, along with presenting it in a clear and concise manner.
   llm: openai/gpt-4o-mini
 
