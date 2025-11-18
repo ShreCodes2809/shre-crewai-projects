@@ -21,6 +21,6 @@ class PushNotificationTool(BaseTool):
         pushover_url = "https://api.pushover.net/1/messages.json"
 
         print(f"Push: {message}")
-        payload = {"user": pushover_user, "token": pushover_user, "message": message}
+        payload = {"user": pushover_user, "token": pushover_token, "message": message}
         requests.post(pushover_url, data=payload)
         return '{"notification": "OK"}'
