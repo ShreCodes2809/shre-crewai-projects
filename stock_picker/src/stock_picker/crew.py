@@ -75,7 +75,7 @@ class StockPicker():
                 embedder_config={
                     "provider": "openai",
                     "config": {
-                        "model": "text-embedding-3-small"
+                        "model_name": "text-embedding-3-small"
                     }
                 },
                 type="short_term",
@@ -85,7 +85,7 @@ class StockPicker():
 
         long_term_memory = LongTermMemory(
             storage = LTMSQLiteStorage(
-                dbpath="./memory/long_term_memory_storage.db"
+                db_path="./memory/long_term_memory_storage.db"
             )
         )
 
@@ -94,7 +94,7 @@ class StockPicker():
                 embedder_config={
                     "provider": "openai",
                     "config": {
-                        "model": "text-embedding-3-small"
+                        "model_name": "text-embedding-3-small"
                     }
                 },
                 type="short_term",
