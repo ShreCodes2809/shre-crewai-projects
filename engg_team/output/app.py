@@ -1,90 +1,89 @@
 import gradio as gr
-from accounts import Account
-
-# Initialize account
-account = Account(user_id="user_1", initial_deposit=10000.0)
+from accounts import Account, get_share_price
 
 def create_account(initial_deposit):
     global account
-    account = Account(user_id="user_1", initial_deposit=initial_deposit)
-    return f"Account created with initial deposit of {initial_deposit}"
+    account = Account(initial_deposit)
+    return f"Account created with initial deposit: ${initial_deposit}"
 
-def get_balance():
-    return f"Current balance: {account.balance}"
+def deposit_funds(amount):
+    account.deposit(amount)
+    return f"Deposited: ${amount}\nCurrent Balance: ${account.balance}"
 
-def deposit(amount):
-    if account.deposit_funds(amount):
-        return f"Deposited {amount}. New balance: {account.balance}"
+def withdraw_funds(amount):
+    if account.withdraw(amount):
+        return f"Withdrew: ${amount}\nCurrent Balance: ${account.balance}"
     else:
-        return "Failed to deposit."
-
-def withdraw(amount):
-    if account.withdraw_funds(amount):
-        return f"Withdrawn {amount}. New balance: {account.balance}"
-    else:
-        return "Failed to withdraw."
+        return "Withdrawal failed. Insufficient funds."
 
 def buy_shares(symbol, quantity):
     if account.buy_shares(symbol, quantity):
-        return f"Bought {quantity} shares of {symbol}."
+        return f"Bought {quantity} shares of {symbol}\nCurrent Balance: ${account.balance}"
     else:
-        return "Failed to buy shares."
+        return "Purchase failed. Insufficient funds or invalid symbol."
 
 def sell_shares(symbol, quantity):
     if account.sell_shares(symbol, quantity):
-        return f"Sold {quantity} shares of {symbol}."
+        return f"Sold {quantity} shares of {symbol}\nCurrent Balance: ${account.balance}"
     else:
-        return "Failed to sell shares."
+        return "Sale failed. Not enough shares."
 
-def get_portfolio_value():
-    value = account.get_portfolio_value()
-    return f"Total portfolio value: {value}"
-
-def get_profit_loss():
-    pl = account.get_profit_loss()
-    return f"Profit/Loss: {pl}"
-
-def get_holdings():
+def view_portfolio():
+    value = account.calculate_portfolio_value()
     holdings = account.get_holdings()
-    return f"Current holdings: {holdings}"
+    return f"Portfolio Value: ${value}\nHoldings: {holdings}"
 
-def get_transaction_history():
-    transactions = account.get_transaction_history()
-    return f"Transaction history: {transactions}"
+def view_profit_loss():
+    profit_loss = account.calculate_profit_loss()
+    return f"Profit/Loss: ${profit_loss}"
 
-iface = gr.Interface(
-    fn={
-        "Create Account": create_account,
-        "Check Balance": get_balance,
-        "Deposit Funds": deposit,
-        "Withdraw Funds": withdraw,
-        "Buy Shares": buy_shares,
-        "Sell Shares": sell_shares,
-        "Portfolio Value": get_portfolio_value,
-        "Profit/Loss": get_profit_loss,
-        "Check Holdings": get_holdings,
-        "Transaction History": get_transaction_history,
-    },
-    inputs={
-        "Create Account": gr.inputs.Number(label="Initial Deposit"),
-        "Deposit Funds": gr.inputs.Number(label="Deposit Amount"),
-        "Withdraw Funds": gr.inputs.Number(label="Withdraw Amount"),
-        "Buy Shares": [gr.inputs.Textbox(label="Symbol"), gr.inputs.Number(label="Quantity")],
-        "Sell Shares": [gr.inputs.Textbox(label="Symbol"), gr.inputs.Number(label="Quantity")],
-    },
-    outputs={
-        "Create Account": "text",
-        "Check Balance": "text",
-        "Deposit Funds": "text",
-        "Withdraw Funds": "text",
-        "Buy Shares": "text",
-        "Sell Shares": "text",
-        "Portfolio Value": "text",
-        "Profit/Loss": "text",
-        "Check Holdings": "text",
-        "Transaction History": "text"
-    },
-    live=False
-)
+def view_transactions():
+    transactions = account.get_transactions()
+    return f"Transactions: {transactions}"
 
-iface.launch()
+with gr.Blocks() as demo:
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("### Account Management")
+            initial_deposit_input = gr.Number(label="Initial Deposit")
+            create_button = gr.Button("Create Account")
+            create_output = gr.Textbox()
+            create_button.click(create_account, initial_deposit_input, create_output)
+            
+            deposit_input = gr.Number(label="Deposit Amount")
+            deposit_button = gr.Button("Deposit Funds")
+            deposit_output = gr.Textbox()
+            deposit_button.click(deposit_funds, deposit_input, deposit_output)
+            
+            withdraw_input = gr.Number(label="Withdraw Amount")
+            withdraw_button = gr.Button("Withdraw Funds")
+            withdraw_output = gr.Textbox()
+            withdraw_button.click(withdraw_funds, withdraw_input, withdraw_output)
+            
+            gr.Markdown("### Trading")
+            symbol_input = gr.Textbox(label="Share Symbol (AAPL, TSLA, GOOGL)")
+            quantity_input = gr.Number(label="Quantity")
+            
+            buy_button = gr.Button("Buy Shares")
+            buy_output = gr.Textbox()
+            buy_button.click(buy_shares, [symbol_input, quantity_input], buy_output)
+            
+            sell_button = gr.Button("Sell Shares")
+            sell_output = gr.Textbox()
+            sell_button.click(sell_shares, [symbol_input, quantity_input], sell_output)
+            
+            gr.Markdown("### Reports")
+            portfolio_button = gr.Button("View Portfolio")
+            portfolio_output = gr.Textbox()
+            portfolio_button.click(view_portfolio, None, portfolio_output)
+            
+            profit_loss_button = gr.Button("View Profit/Loss")
+            profit_loss_output = gr.Textbox()
+            profit_loss_button.click(view_profit_loss, None, profit_loss_output)
+            
+            transactions_button = gr.Button("View Transactions")
+            transactions_output = gr.Textbox()
+            transactions_button.click(view_transactions, None, transactions_output)
+
+if __name__ == "__main__":
+    demo.launch()
